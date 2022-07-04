@@ -1,12 +1,21 @@
-import { Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
 import { ApiOperation, ApiBody, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
+import { Model } from 'mongoose';
 import { DiscussionSetCreateDTO } from 'src/entities/discussion-set/create-discussion-set';
+import { DiscussionSet } from 'src/entities/discussion-set/discussion-set';
 import { DiscussionSetEditDTO } from 'src/entities/discussion-set/edit-discussion-set';
+import { Discussion } from 'src/entities/discussion/discussion';
+import { User } from 'src/entities/user/user';
 
 
 @Controller()
 export class DiscussionSetController {
-  constructor() {}
+  constructor(
+    @InjectModel(DiscussionSet.name) private discussionSetModel: Model<DiscussionSet>,
+    @InjectModel(Discussion.name) private discussionModel: Model<Discussion>,
+    @InjectModel(User.name) private userModel: Model<User>
+  ) {}
 
   @Post('discussion-set')
   @ApiOperation({description: 'Creates a discussion Set'})
@@ -17,7 +26,7 @@ export class DiscussionSetController {
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion Set')
-  createDiscussionSet(): string {
+  async createDiscussionSet(@Body() discussionSet: DiscussionSetCreateDTO): Promise<string> {
     return 'discussion-set'
   }
 
@@ -30,7 +39,7 @@ export class DiscussionSetController {
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion Set')
-  updateDiscussionSetMetadata(): string {
+  async updateDiscussionSetMetadata(@Param('setId') setId: string): Promise<string> {
     return 'discussion-set'
   }
 
@@ -43,7 +52,7 @@ export class DiscussionSetController {
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion Set')
-  addDiscussionToSet(): string {
+  async addDiscussionToSet(@Param('setId') setId: string, @Body() discussionIds: string[]): Promise<string> {
     return 'discussion-set'
   }
 
@@ -56,7 +65,7 @@ export class DiscussionSetController {
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion Set')
-  archiveDiscussionSet(): string {
+  async archiveDiscussionSet(@Param('setId') setId: string): Promise<string> {
     return 'discussion-set'
   }
 
@@ -68,7 +77,7 @@ export class DiscussionSetController {
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion Set')
-  deleteSet(): string {
+  async deleteSet(@Param('setId') setId: string): Promise<string> {
     return 'discussion-set'
   }
 }
