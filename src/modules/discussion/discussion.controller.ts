@@ -102,18 +102,25 @@ export class DiscussionController {
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion')
   async getDiscussion(@Param('discussionId') discussionId: string): Promise<string> {
-    return 'wowo';
+    if(!Types.ObjectId.isValid(discussionId)) {
+      throw new HttpException('Discussion Id is not valid', HttpStatus.BAD_REQUEST);
+    }
+    return this.discussionModel.findById(discussionId);
+    
   }
 
-  @Get('discussions')
+  @Get('discussions/:userId')
   @ApiOperation({description: 'Gets discussions for a user from the database'})
   @ApiOkResponse({ description: 'Discussions'})
   @ApiBadRequestResponse({ description: ''})
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion')
-  async getDiscussions(): Promise<Discussion[]> {
-    return;
+  async getDiscussions(@Param('userId') userId: string): Promise<DiscussionReadDTO[]> {
+    if(!Types.ObjectId.isValid(userId)) {
+      throw new HttpException('Discussion Id is not valid', HttpStatus.BAD_REQUEST);
+    }
+    return this.discussionModel.find({ poster: new Types.ObjectId(userId) });
   }
 
   @Patch('discussion/:discussionId/settings')
