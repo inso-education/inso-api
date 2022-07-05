@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ApiOperation, ApiBody, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { DiscussionSetCreateDTO } from 'src/entities/discussion-set/create-discussion-set';
 import { DiscussionSet } from 'src/entities/discussion-set/discussion-set';
 import { DiscussionSetEditDTO } from 'src/entities/discussion-set/edit-discussion-set';
@@ -27,7 +27,23 @@ export class DiscussionSetController {
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion Set')
   async createDiscussionSet(@Body() discussionSet: DiscussionSetCreateDTO): Promise<string> {
-    return 'discussion-set'
+    discussionSet.poster = new Types.ObjectId(discussionSet.poster);
+    discussionSet.facilitators = discussionSet.facilitators.map(user => {
+      return new Types.ObjectId(user)
+    });
+
+    // Check if the poster exists
+    const foundUser = await this.userModel.findOne({ _id: discussionSet.poster});
+    if(!foundUser) {
+      throw new HttpException('User does not exist', HttpStatus.NOT_FOUND)
+    }
+
+    // Check if all the facilitators exist
+    for await(const user of discussionSet.facilitators) {
+      let found = await this.userModel.findOne({ _id: user})
+    }
+    const discussSet = new this.discussionSetModel(discussionSet);
+    return await(await discussSet.save())._id.toString();
   }
 
   @Patch('discussion-set/:setId')
