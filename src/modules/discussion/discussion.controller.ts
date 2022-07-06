@@ -101,8 +101,12 @@ export class DiscussionController {
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion')
-  async getDiscussion(@Param('discussionId') discussionId: string): Promise<string> {
-    return 'wowo';
+  async getDiscussion(@Param('discussionId') discussionId: string): Promise<DiscussionReadDTO> {
+    if(!Types.ObjectId.isValid(discussionId)) {
+      throw new HttpException('Discussion Id is not valid', HttpStatus.BAD_REQUEST)
+    }
+    // Have to build out a discussion read functionality
+    return this.discussionModel.findOne({discussionId});
   }
 
   @Get('users/:userId/discussions')
