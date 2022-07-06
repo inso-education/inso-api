@@ -6,43 +6,6 @@ import { Types } from 'mongoose';
 
 export class DiscussionSetEditDTO {
     @ApiProperty({
-        name: 'id',
-        description: 'The ObjectId of the discussion set',
-        required: false,
-        type: Types.ObjectId,
-        isArray: true,
-        example: '507f1f77bcf86cd799439011'
-      })
-    @IsNotEmpty()
-    @Type(() => Types.ObjectId)
-    @Transform((id:any) => {
-        if (!Types.ObjectId.isValid(id.value)) {
-          throw new BadRequestException(['Invalid ObjectId for Discussion Set Id']);
-        }
-    
-        return new Types.ObjectId(id.value);
-    })
-    public id: Types.ObjectId;
-
-
-    @ApiProperty({
-        name: 'insoCode',
-        description: 'The insoCode for the discussion set',
-        required: false,
-        type: String,
-        isArray: true,
-        example: '507f1f77bcf86cd799439011'
-      })
-    @IsOptional()
-    @IsNotEmpty()
-    @Type(() => Types.ObjectId)
-    @Transform((id:any) => {
-        // Whatever code we decide to go with should be validated here
-        return id;
-    })
-    public insoCode: string;
-
-    @ApiProperty({
         name: 'name',
         description: 'The updated name for the discussion set',
         required: false,

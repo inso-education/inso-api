@@ -48,11 +48,12 @@ export class DiscussionController {
         throw new HttpException("A user does not exist in the facilitators array", HttpStatus.NOT_FOUND);
       }
     }
-    // Create Inso Code 
-    const code = makeInsoId(5);
     // Check that the code is not active in the database
     let found = new this.discussionModel();
     while(found !== null) {
+        // Create Inso Code 
+      const code = makeInsoId(5);
+      // Check that it is not in the database
       found = await this.discussionModel.findOne({ insoCode: code });
       const createdDiscussion = new this.discussionModel({...discussion, insoCode: code});
       return await createdDiscussion.save();

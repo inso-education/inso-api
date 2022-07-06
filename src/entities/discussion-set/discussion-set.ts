@@ -7,19 +7,16 @@ export type DiscussionSetDocument = DiscussionSet & Document;
 
 @Schema()
 export class DiscussionSet {
-    @Prop(Types.ObjectId)
-    public id: Types.ObjectId;
-
     @Prop(String)
     public insoCode: string;
 
     @Prop(String)
     public name: string;
 
-    @Prop(Date)
+    @Prop({ Date, default: new Date()})
     public created: Date;
 
-    @Prop(Date)
+    @Prop({ Date, default: null })
     public archived: Date;
 
     @Prop([Types.ObjectId])
