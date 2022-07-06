@@ -106,6 +106,7 @@ export class DiscussionController {
       throw new HttpException('Discussion Id is not valid', HttpStatus.BAD_REQUEST)
     }
     // Have to build out a discussion read functionality
+    // Need to get settings, members, inspirations in full, score in full, and calendar in full. 
     return this.discussionModel.findOne({discussionId});
   }
 
