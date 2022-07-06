@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ApiOperation, ApiBody, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiBody, ApiParam, ApiOkResponse, ApiBadRequestResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiTags, ApiConflictResponse } from '@nestjs/swagger';
 import { Model, Types } from 'mongoose';
 import { DiscussionSetCreateDTO } from 'src/entities/discussion-set/create-discussion-set';
 import { DiscussionSet } from 'src/entities/discussion-set/discussion-set';
@@ -20,10 +20,10 @@ export class DiscussionSetController {
 
   @Post('discussion-set')
   @ApiOperation({description: 'Creates a discussion Set'})
-  @ApiBody({description: 'Discussion Set Create', type: DiscussionSetCreateDTO})
+  @ApiBody({description: 'Discussion Set to create', type: DiscussionSetCreateDTO})
   @ApiOkResponse({ description: 'DiscussionId', type: String})
   @ApiBadRequestResponse({ description: 'Poster, facilitators, or user is not valid'})
-  @ApiUnauthorizedResponse({ description: ''})
+  @ApiUnauthorizedResponse({ description: 'User is not authorized to create a discussion set'})
   @ApiNotFoundResponse({ description: 'The User trying to create the discussion set does not exist'})
   @ApiTags('Discussion Set')
   async createDiscussionSet(@Body() discussionSet: DiscussionSetCreateDTO): Promise<string> {
@@ -59,12 +59,12 @@ export class DiscussionSetController {
 
   @Patch('discussion-set/:setId')
   @ApiOperation({description: 'Updates a discussion set'})
-  @ApiBody({description: '', type: DiscussionSetEditDTO})
-  @ApiParam({name: '', description: ''})
-  @ApiOkResponse({ description: ''})
-  @ApiBadRequestResponse({ description: ''})
+  @ApiBody({description: 'Discussion Set Update', type: DiscussionSetEditDTO})
+  @ApiParam({name: 'setId', description: 'The id of the discussion set to update'})
+  @ApiOkResponse({ description: 'Discussion Set Updated'})
+  @ApiBadRequestResponse({ description: 'Discussion Set Id is not valid'})
   @ApiUnauthorizedResponse({ description: ''})
-  @ApiNotFoundResponse({ description: ''})
+  @ApiNotFoundResponse({ description: 'The '})
   @ApiTags('Discussion Set')
   async updateDiscussionSetMetadata(
     @Param('setId') setId: string,
@@ -85,7 +85,7 @@ export class DiscussionSetController {
   @ApiOkResponse({ description: 'Discussions added'})
   @ApiBadRequestResponse({ description: 'Discussion Id is not valid or one of the discussion Ids is not valid'})
   @ApiUnauthorizedResponse({ description: ''})
-  @ApiNotFoundResponse({ description: 'The discussion set does not exist'})
+  @ApiNotFoundResponse({ description: 'The discussion set does not exist or the discussion being added to the set does not exist'})
   @ApiTags('Discussion Set')
   async addDiscussionToSet(@Param('setId') setId: string, @Body() discussionIds: string[]): Promise<any> {
     if(!Types.ObjectId.isValid(setId)){
@@ -98,13 +98,15 @@ export class DiscussionSetController {
         throw new HttpException('Discussion id is not a valid ObjectId', HttpStatus.BAD_REQUEST);
       }
       let discussionId = new Types.ObjectId(discussion);
-      const discussionFound = await this.discussionModel.findOne({ _id: discussionId });
-      if(!discussionFound) {
-        throw new HttpException('Discussion ' + discussionId + ' not found', HttpStatus.NOT_FOUND);
-      }
 
-      await this.discussionModel.updateOne({ _id: discussionId }, {$push: { set: mongoSetId }})
+      const updated = await this.discussionModel.updateOne({ _id: discussionId }, {$push: { set: mongoSetId }});
+      if(updated.matchedCount === 0) {
+        throw new HttpException('Discussion Set not found', HttpStatus.NOT_FOUND);
+      } else if(updated.modifiedCount === 0) {
+        throw new HttpException('Discussion Set already archived', HttpStatus.BAD_REQUEST);
+      }
     }
+    return 'Discussions added to set';
   }
 
   @Patch('discussion-set/:setId/archive')
@@ -113,7 +115,8 @@ export class DiscussionSetController {
   @ApiOkResponse({ description: 'Set archived'})
   @ApiBadRequestResponse({ description: 'The setId provided in not valid'})
   @ApiUnauthorizedResponse({ description: ''})
-  @ApiNotFoundResponse({ description: ''})
+  @ApiNotFoundResponse({ description: 'The discussion set was not found'})
+  @ApiConflictResponse({ description: 'The discussion is already archived'})
   @ApiTags('Discussion Set')
   async archiveDiscussionSet(@Param('setId') setId: string): Promise<any> {
     if(!Types.ObjectId.isValid(setId)){
@@ -126,7 +129,7 @@ export class DiscussionSetController {
     } else if(update.matchedCount === 0) {
       throw new HttpException('Discussion Set not found', HttpStatus.NOT_FOUND);
     } else if(update.modifiedCount === 0) {
-      throw new HttpException('Discussion Set already archived', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Discussion Set already archived', HttpStatus.CONFLICT);
     }
   }
 
@@ -136,7 +139,7 @@ export class DiscussionSetController {
   @ApiOkResponse({ description: ''})
   @ApiBadRequestResponse({ description: 'A discussion has already been answered. You cannot delete the discussion set'})
   @ApiUnauthorizedResponse({ description: ''})
-  @ApiNotFoundResponse({ description: ''})
+  @ApiNotFoundResponse({ description: 'The discussion to delete was not found'})
   @ApiTags('Discussion Set')
   async deleteSet(@Param('setId') setId: string): Promise<string> {
     if(!Types.ObjectId.isValid(setId)){
