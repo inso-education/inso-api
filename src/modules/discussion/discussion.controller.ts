@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ApiBadRequestResponse, ApiBody, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Model, Types } from 'mongoose';
@@ -105,14 +105,18 @@ export class DiscussionController {
     return 'wowo';
   }
 
-  @Get('discussions')
+  @Get('users/:userId/discussions')
   @ApiOperation({description: 'Gets discussions for a user from the database'})
   @ApiOkResponse({ description: 'Discussions'})
   @ApiBadRequestResponse({ description: ''})
   @ApiUnauthorizedResponse({ description: ''})
   @ApiNotFoundResponse({ description: ''})
   @ApiTags('Discussion')
-  async getDiscussions(): Promise<Discussion[]> {
+  async getDiscussions(@Param('userId') userId: string, @Query('participant') participant: boolean, @Query('facilitator') facilitator: boolean): Promise<Discussion[]> {
+    // If participant is not there then we assume true
+    // If facilitator is not there then we assume true
+    // If participant is true we will retrieve the discussionsIds from the user and query to get those
+    // If facilitator is true we will retrieve the discussions that have their userId in the facilitators array
     return;
   }
 
