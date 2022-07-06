@@ -74,8 +74,12 @@ export class DiscussionSetController {
       throw new HttpException('Discussion Set Id is not valid', HttpStatus.BAD_REQUEST);
     }
     const mongoSetId = new Types.ObjectId(setId);
-    await this.discussionSetModel.updateOne({ _id: mongoSetId }, updates);
-    return 'Discussion Set Updated';
+    const setUpdate = await this.discussionSetModel.updateOne({ _id: mongoSetId }, updates);
+    if(setUpdate.matchedCount > 0) {
+      return 'Discussion Set Updated';
+    } else {
+      throw new HttpException('Discussion set does not exist', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Patch('discussion-set/:setId/discussions')

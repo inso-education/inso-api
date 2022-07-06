@@ -19,20 +19,6 @@ export class DiscussionSetEditDTO {
     public name: string;
 
     @ApiProperty({
-        name: 'archived',
-        description: 'The Date that the discussion set is archived',
-        required: false,
-        type: Date,
-        isArray: true,
-        example: 'Fri Apr 15 2022 13:01:58 GMT-0400 (Eastern Daylight Time)'
-    })
-    @IsOptional()
-    @IsNotEmpty()
-    @Type(() => Date)
-    @IsDate()
-    public archived: Date;
-
-    @ApiProperty({
         name: 'facilitators',
         description: 'The ObjectId of the facilitators of the discussion set',
         required: false,
