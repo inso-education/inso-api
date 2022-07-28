@@ -27,7 +27,7 @@ export enum SUBJECTS {
 }
 
 export enum TEMPLATES {
-    CONFIRM_EMAIL = "confirm email",
+    CONFIRM_EMAIL = "confirm this email address",
     RESET_PASSWORD = 'reset password request',
     CONFIRM_PASSWORD_RESET = "confirm password reset"
 }

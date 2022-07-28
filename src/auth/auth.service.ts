@@ -1,24 +1,23 @@
-import { HttpException, HttpStatus, Injectable, Post, UseGuards, Request, Get, Body, Inject, forwardRef } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserController } from 'src/modules/user/user.controller';
 import * as bcrypt from 'bcrypt';
 import { Model, Types } from 'mongoose';
-import { DiscussionController } from 'src/modules/discussion/discussion.controller';
 import { InjectModel } from '@nestjs/mongoose';
 import { Discussion, DiscussionDocument } from 'src/entities/discussion/discussion';
 import { DiscussionPost, DiscussionPostDocument } from 'src/entities/post/post';
 import { Calendar, CalendarDocument } from 'src/entities/calendar/calendar';
 import { Score, ScoreDocument } from 'src/entities/score/score';
 import { User, UserDocument } from 'src/entities/user/user';
+import { SGService } from 'src/drivers/sendgrid';
 import { validatePassword } from 'src/entities/user/commonFunctions/validatePassword';
 import { GoogleUserDTO } from 'src/entities/user/google-user';
 import { UserReadDTO } from 'src/entities/user/read-user';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private userController: UserController, 
+    constructor( 
         private jwtService: JwtService,
+        private sgService: SGService,
         @InjectModel(Discussion.name) private discussionModel: Model<DiscussionDocument>, 
         @InjectModel(DiscussionPost.name) private postModel: Model<DiscussionPostDocument>,
         @InjectModel(Score.name) private scoreModel: Model<ScoreDocument>,
@@ -32,6 +31,8 @@ export class AuthService {
         if(!user){
             throw new HttpException('Email does not exist in database', HttpStatus.NOT_FOUND);
         }
+
+        console.log("validate user function, user: " + user);
 
         if(!user.password) {
             throw new HttpException('User has Google SSO configured. Please login through Google', HttpStatus.BAD_REQUEST);
@@ -218,4 +219,5 @@ export class AuthService {
             }
         });
     }
+
 }
